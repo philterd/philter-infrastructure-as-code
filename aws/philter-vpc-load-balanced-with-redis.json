@@ -1,0 +1,706 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creates a load-balanced and auto-scaled Philter deployment with anonymization cache.",
+  "Parameters": {
+    "CacheAuthToken": {
+      "Description": "Token for the cache authentication",
+      "Default": "L3H9dZh3UPwTvLUS",
+      "Type": "String"
+    },
+    "PhilterVersion": {
+      "Description": "The version of Philter to deploy",
+      "Default": "v131",
+      "Type": "String",
+      "AllowedValues": [
+        "v131",
+        "v130",
+        "v120",
+        "v110",
+        "v101",
+        "v100"
+      ]
+    },
+    "PhilterInstanceType": {
+      "Description": "Philter EC2 instance type",
+      "Type": "String",
+      "Default": "m5.large",
+      "AllowedValues": [
+        "m5.large",
+        "m5.xlarge",
+        "t3.large",
+        "t3.xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid Philter EC2 instance type."
+    },
+    "PhilterMinInstances": {
+      "Description": "The minimum number of Philter instances",
+      "Type": "Number",
+      "Default": 2
+    },
+    "PhilterMaxInstances": {
+      "Description": "The maximum number of Philter instances",
+      "Type": "Number",
+      "Default": 10
+    }
+  },
+  "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "v140": "",
+        "v131": "ami-02447712b95a2b6ef",
+        "v130": "ami-056684370df7a6369",
+        "v120": "ami-066aee69a0f5d29cf",
+        "v110": "ami-01831a0a1a6190a55",
+        "v101": "ami-0a49dd8c386ea6c2c",
+        "v100": "ami-027220e1960d5d016"
+      },
+      "us-east-2": {
+        "v140": "",
+        "v131": "ami-0ee73da0d2a7032f6",
+        "v130": "ami-0f2bd945e895513c2",
+        "v120": "ami-0a5f4375eb546c31e",
+        "v110": "ami-0cf396c2f36b1e76c",
+        "v101": "ami-076c11a1b546e7e2d",
+        "v100": "ami-0e8e5bd70ed6d6fdd"
+      },
+      "us-west-1": {
+        "v140": "",
+        "v131": "ami-0ce182a9c2c4f368e",
+        "v130": "ami-0990880fb27e33219",
+        "v120": "ami-009292b69d3c53c4c",
+        "v110": "ami-069fea74abd2b69af",
+        "v101": "ami-04817251461e92720",
+        "v100": "ami-0f984901cc0f822d3"
+      },
+      "us-west-2": {
+        "v140": "",
+        "v131": "ami-0873538d8179fde10",
+        "v130": "ami-0c2a8f82fb0af9f53",
+        "v120": "ami-0619eb5ebfe14e9f5",
+        "v110": "ami-084642b32536f2911",
+        "v101": "ami-0ae4843578c7cfdc7",
+        "v100": "ami-0794c35ebe9e36b19"
+      }
+    }
+  },
+  "Resources": {
+    "PhilterVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.50.0.0/16",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-vpc"
+          }
+        ]
+      }
+    },
+    "PhilterVPCInternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-vpc-internet-gateway"
+          }
+        ]
+      }
+    },
+    "AttachVpcGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "PhilterVPCInternetGateway"
+        },
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        }
+      }
+    },
+    "PhilterNATGateway": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "NATGatewayEIP",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PhilterPublicSubnet1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-vpc-nat-gateway"
+          }
+        ]
+      }
+    },
+    "NATGatewayEIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "PublicSubnetRoute": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PhilterPublicSubnetRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "PhilterVPCInternetGateway"
+        }
+      }
+    },
+    "PrivateSubnetRoute": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PhilterPrivateSubnetRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "PhilterNATGateway"
+        }
+      }
+    },
+    "PhilterPublicSubnetRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-public-subnet-route-table"
+          }
+        ]
+      }
+    },
+    "PhilterPrivateSubnetRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-private-subnet-route-table"
+          }
+        ]
+      }
+    },
+    "PhilterPublicSubnet1RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PhilterPublicSubnet1"
+        },
+        "RouteTableId": {
+          "Ref": "PhilterPublicSubnetRouteTable"
+        }
+      }
+    },
+    "PhilterPublicSubnet2RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PhilterPublicSubnet2"
+        },
+        "RouteTableId": {
+          "Ref": "PhilterPublicSubnetRouteTable"
+        }
+      }
+    },
+    "PhilterPrivateSubnet1RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PhilterPrivateSubnet1"
+        },
+        "RouteTableId": {
+          "Ref": "PhilterPrivateSubnetRouteTable"
+        }
+      }
+    },
+    "PhilterPrivateSubnet2RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PhilterPrivateSubnet2"
+        },
+        "RouteTableId": {
+          "Ref": "PhilterPrivateSubnetRouteTable"
+        }
+      }
+    },
+    "PhilterPublicSubnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        },
+        "CidrBlock": "10.50.0.0/24",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "0",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-public-subnet-1"
+          }
+        ]
+      }
+    },
+    "PhilterPublicSubnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        },
+        "CidrBlock": "10.50.1.0/24",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "1",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-public-subnet-2"
+          }
+        ]
+      }
+    },
+    "PhilterPrivateSubnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        },
+        "CidrBlock": "10.50.2.0/24",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "0",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-private-subnet-1"
+          }
+        ]
+      }
+    },
+    "PhilterPrivateSubnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        },
+        "CidrBlock": "10.50.3.0/24",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "1",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-private-subnet-2"
+          }
+        ]
+      }
+    },
+    "PhilterAutoScalingGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "DesiredCapacity": {
+          "Ref": "PhilterMinInstances"
+        },
+        "HealthCheckGracePeriod": 60,
+        "LaunchConfigurationName": {
+          "Ref": "LaunchConfig"
+        },
+        "LoadBalancerNames": [
+          {
+            "Ref": "PhilterLoadBalancer"
+          }
+        ],
+        "MinSize": {
+          "Ref": "PhilterMinInstances"
+        },
+        "MaxSize": {
+          "Ref": "PhilterMaxInstances"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Philter",
+            "PropagateAtLaunch": true
+          },
+          {
+            "Key": "Philter Version",
+            "Value": {
+              "Ref": "PhilterVersion"
+            },
+            "PropagateAtLaunch": true
+          }
+        ],
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "PhilterPrivateSubnet1"
+          },
+          {
+            "Ref": "PhilterPrivateSubnet2"
+          }
+        ]
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT15M"
+        }
+      },
+      "UpdatePolicy": {
+        "AutoScalingRollingUpdate": {
+          "MinInstancesInService": "1",
+          "MaxBatchSize": "1",
+          "PauseTime": "PT15M",
+          "WaitOnResourceSignals": "true"
+        }
+      }
+    },
+    "LaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "DependsOn": "PhilterCache",
+      "Properties": {
+        "AssociatePublicIpAddress": "false",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "Encrypted": true,
+              "VolumeSize": 20,
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            {
+              "Ref": "PhilterVersion"
+            }
+          ]
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "PhilterSecurityGroup"
+          }
+        ],
+        "InstanceType": {
+          "Ref": "PhilterInstanceType"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "echo 'server.port=8080' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'logging.level.root=INFO' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'model.file=/opt/philter/final-model.pt' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'anonymization.cache.service.redis.enabled=true' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'anonymization.cache.service.redis.host=",
+                {
+                  "Fn::GetAtt": [
+                    "PhilterCache",
+                    "PrimaryEndPoint.Address"
+                  ]
+                },
+                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'anonymization.cache.service.redis.port=6379\n' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'anonymization.cache.service.redis.auth.token=",
+                {
+                  "Ref": "CacheAuthToken"
+                },
+                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "sudo systemctl restart philter.service\n",
+                "sudo systemctl restart philter-ner.service\n",
+                "# Signal the status from cfn-init\n",
+                "/opt/aws/bin/cfn-signal -e $? ",
+                "         --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource PhilterAutoScalingGroup ",
+                "         --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "ScaleUpPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "PhilterAutoScalingGroup"
+        },
+        "Cooldown": "300",
+        "ScalingAdjustment": "1"
+      }
+    },
+    "CPUAlarmHigh": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "EvaluationPeriods": "1",
+        "Statistic": "Average",
+        "Threshold": "70",
+        "AlarmDescription": "Alarm if CPU too high or metric disappears indicating instance is down",
+        "Period": "60",
+        "AlarmActions": [
+          {
+            "Ref": "ScaleUpPolicy"
+          }
+        ],
+        "Namespace": "AWS/EC2",
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "PhilterAutoScalingGroup"
+            }
+          }
+        ],
+        "ComparisonOperator": "GreaterThanThreshold",
+        "MetricName": "CPUUtilization"
+      }
+    },
+    "ScaleDownPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "PhilterAutoScalingGroup"
+        },
+        "Cooldown": "600",
+        "ScalingAdjustment": "-1"
+      }
+    },
+    "CPUAlarmLow": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "EvaluationPeriods": "1",
+        "Statistic": "Average",
+        "Threshold": "30",
+        "AlarmDescription": "Alarm if CPU too low",
+        "Period": "60",
+        "AlarmActions": [
+          {
+            "Ref": "ScaleDownPolicy"
+          }
+        ],
+        "Namespace": "AWS/EC2",
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "PhilterAutoScalingGroup"
+            }
+          }
+        ],
+        "ComparisonOperator": "LessThanThreshold",
+        "MetricName": "CPUUtilization"
+      }
+    },
+    "PhilterLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "DependsOn": "PhilterVPCInternetGateway",
+      "Properties": {
+        "HealthCheck": {
+          "HealthyThreshold": "2",
+          "Interval": "30",
+          "Target": "HTTPS:8080/api/status",
+          "Timeout": 10,
+          "UnhealthyThreshold": 10
+        },
+        "Listeners": [
+          {
+            "InstancePort": 8080,
+            "InstanceProtocol": "TCP",
+            "LoadBalancerPort": 8080,
+            "Protocol": "TCP"
+          }
+        ],
+        "Scheme": "internet-facing",
+        "Subnets": [
+          {
+            "Ref": "PhilterPublicSubnet1"
+          },
+          {
+            "Ref": "PhilterPublicSubnet2"
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "Ref": "LoadBalancerSecurityGroup"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "philter-load-balancer"
+          }
+        ]
+      }
+    },
+    "LoadBalancerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable access to Philter API",
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "8080",
+            "ToPort": "8080",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "PhilterSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for Philter",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "8080",
+            "ToPort": "8080",
+            "SourceSecurityGroupId": {
+              "Ref": "LoadBalancerSecurityGroup"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        }
+      }
+    },
+    "CacheSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Philter cache security group",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "11211",
+            "ToPort": "11211",
+            "SourceSecurityGroupId": {
+              "Ref": "PhilterSecurityGroup"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        }
+      }
+    },
+    "PhilterCacheSubnetGroup": {
+      "Type": "AWS::ElastiCache::SubnetGroup",
+      "Properties": {
+        "Description": "Philter cache subnet group",
+        "SubnetIds": [
+          {
+            "Ref": "PhilterPrivateSubnet1"
+          },
+          {
+            "Ref": "PhilterPrivateSubnet2"
+          }
+        ]
+      }
+    },
+    "PhilterCache": {
+      "Type": "AWS::ElastiCache::ReplicationGroup",
+      "Properties": {
+        "AtRestEncryptionEnabled": true,
+        "AuthToken": {
+          "Ref": "CacheAuthToken"
+        },
+        "AutomaticFailoverEnabled": true,
+        "ReplicationGroupDescription": "my description",
+        "NumCacheClusters": 2,
+        "Engine": "redis",
+        "CacheNodeType": "cache.t3.small",
+        "AutoMinorVersionUpgrade": true,
+        "AutomaticFailoverEnabled": true,
+        "CacheSubnetGroupName": {
+          "Ref": "PhilterCacheSubnetGroup"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "CacheSecurityGroup"
+          }
+        ],
+        "EngineVersion": "4.0.10",
+        "Port": 6379,
+        "TransitEncryptionEnabled": true
+      }
+    }
+  },
+  "Outputs": {
+    "PhilterEndpoint": {
+      "Description": "Philter API endpoint",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "PhilterLoadBalancer",
+                "DNSName"
+              ]
+            },
+            ":8080/"
+          ]
+        ]
+      }
+    }
+  }
+}
