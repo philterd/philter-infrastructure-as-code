@@ -30,9 +30,9 @@ Click the Launch Stack button to launch the stack in your AWS account, or get th
 aws cloudformation create-stack --stack-name philter --template-url s3://mtnfog-public/philter-resources/philter-vpc-load-balanced-with-redis.json
 ```
 
-Once the stack completes Philter will be ready to accept requests. There will be an Output value called PhilterEndpoint. This value is the Philter API URL.
+Once the stack completes Philter will be ready to accept requests. There will be an Output value called `PhilterEndpoint`. This value is the Philter API URL.
 
-For example, if the value of PhilterEndpoint is https://philter2-philterlo-5lc0jo7if8g1-586151735.us-east-1.elb.amazonaws.com:8080/, then you can check Philter’s status using the command:
+For example, if the value of `PhilterEndpoint` is https://philter2-philterlo-5lc0jo7if8g1-586151735.us-east-1.elb.amazonaws.com:8080/, then you can check Philter’s status using the command:
 
 ```
 curl -k https://philter2-philterlo-5lc0jo7if8g1-586151735.us-east-1.elb.amazonaws.com:8080/api/status

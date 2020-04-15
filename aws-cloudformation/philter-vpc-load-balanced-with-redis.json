@@ -3,7 +3,7 @@
   "Description": "Creates a load-balanced and auto-scaled Philter deployment with anonymization cache.",
   "Parameters": {
     "CacheAuthToken": {
-      "Description": "Token for the cache authentication",
+      "Description": "Auth token for Philter cache - should be a long random string",
       "Default": "L3H9dZh3UPwTvLUS",
       "Type": "String"
     },
@@ -629,8 +629,8 @@
         "SecurityGroupIngress": [
           {
             "IpProtocol": "tcp",
-            "FromPort": "11211",
-            "ToPort": "11211",
+            "FromPort": "6379",
+            "ToPort": "6379",
             "SourceSecurityGroupId": {
               "Ref": "PhilterSecurityGroup"
             }
@@ -663,7 +663,7 @@
           "Ref": "CacheAuthToken"
         },
         "AutomaticFailoverEnabled": true,
-        "ReplicationGroupDescription": "my description",
+        "ReplicationGroupDescription": "Philter cache replication group",
         "NumCacheClusters": 2,
         "Engine": "redis",
         "CacheNodeType": "cache.t3.small",
