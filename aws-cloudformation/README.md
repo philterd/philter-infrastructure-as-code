@@ -1,6 +1,6 @@
 # AWS CloudFormation Template
 
-[![Launch Stack](https://github.com/mtnfog/philter-infrastructure-as-code/blob/master/aws/cloudformation-launch-stack.png?raw=true)](https://console.aws.amazon.com/cloudformation/home?#/stacks/create/review?stackName=philter&templateURL=https://mtnfog-public.s3.amazonaws.com/philter-resources/philter-vpc-load-balanced-with-redis.json)
+[![Launch Stack](https://github.com/mtnfog/philter-infrastructure-as-code/blob/master/aws-cloudformation/cloudformation-launch-stack.png?raw=true)](https://console.aws.amazon.com/cloudformation/home?#/stacks/create/review?stackName=philter&templateURL=https://mtnfog-public.s3.amazonaws.com/philter-resources/philter-vpc-load-balanced-with-redis.json)
 
 This template creates a VPC, load balancer, Philter instances, a Redis cache, and all required networking and security group configuration. Click the Launch Stack button to begin launching the stack.
 
