@@ -677,7 +677,7 @@
             "Ref": "CacheSecurityGroup"
           }
         ],
-        "EngineVersion": "4.0.10",
+        "EngineVersion": "5.0.6",
         "Port": 6379,
         "TransitEncryptionEnabled": true
       }

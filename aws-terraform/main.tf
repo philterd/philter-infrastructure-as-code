@@ -230,7 +230,7 @@ resource "aws_elasticache_replication_group" "philter_cache_replication_group" {
   auto_minor_version_upgrade    = true
   availability_zones            = [data.aws_availability_zones.region_azs.names[0], data.aws_availability_zones.region_azs.names[1]]
   engine                        = "redis"
-  engine_version                = "4.0.10"
+  engine_version                = "5.0.6"
   port                          = 6379
   number_cache_clusters         = 2
   node_type                     = "cache.t3.small"
