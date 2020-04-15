@@ -10,7 +10,7 @@ The stack requires an active subscription to Philter via the AWS Marketplace. Th
 
 ## Architecture Diagram
 
-![Philter Architecture](https://github.com/mtnfog/philter-infrastructure-as-code/blob/master/aws/philter-cloudformation-redis-arch.png?raw=true)
+![Philter Architecture](https://github.com/mtnfog/philter-infrastructure-as-code/blob/master/aws-cloudformation/philter-cloudformation-redis-arch.png?raw=true)
 
 The deployment creates an elastic load balancer that is attached to an auto-scaled group of Philter EC2 instances. The load balancer spans two public subnets and the Philter EC2 instances are spread across two private subnets. Also in the private subnets is an Amazon Elasticache for Redis replication group. A NAT Gateway located in one of the public subnets provides outgoing internet access by routing the traffic to the VPC’s Internet Gateway.
 
