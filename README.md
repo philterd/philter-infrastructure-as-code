@@ -8,7 +8,7 @@ You are welcome to use these resources as-is or to customize them to meet your n
 
 | Platform | Scripts | Description | Launch |
 |----------|--------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| AWS | [Template](https://github.com/mtnfog/philter-infrastructure-as-code/tree/master/aws) | AWS CloudFormation template for load-balanced, highly-available Philter deployment. | [![Launch Stack](https://github.com/mtnfog/philter-infrastructure-as-code/blob/master/aws/cloudformation-launch-stack.png?raw=true)](https://console.aws.amazon.com/cloudformation/home?#/stacks/create/review?stackName=philter&templateURL=https://mtnfog-public.s3.amazonaws.com/philter-resources/philter-vpc-load-balanced-with-redis.json) |
+| AWS | [Template](https://github.com/mtnfog/philter-infrastructure-as-code/tree/master/aws) | AWS CloudFormation template for load-balanced, highly-available Philter deployment. | [![Launch Stack](https://github.com/mtnfog/philter-infrastructure-as-code/blob/master/aws-cloudformation/cloudformation-launch-stack.png?raw=true)](https://console.aws.amazon.com/cloudformation/home?#/stacks/create/review?stackName=philter&templateURL=https://mtnfog-public.s3.amazonaws.com/philter-resources/philter-vpc-load-balanced-with-redis.json) |
 
 ## License
 
