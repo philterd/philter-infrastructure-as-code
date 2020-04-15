@@ -171,7 +171,7 @@ resource "aws_elb" "philter_elb" {
     healthy_threshold   = 2
     unhealthy_threshold = 10
     timeout             = 10
-    target              = "HTTPS:8000/api/status"
+    target              = "HTTPS:880/api/status"
     interval            = 30
   }
   listener {
@@ -205,13 +205,13 @@ resource "aws_autoscaling_group" "philter_autoscaling_group" {
   min_size                  = 2
   max_size                  = 10
   desired_capacity          = 2
-  vpc_zone_identifier       = [aws_subnet.philter_private_subnet_1.id, aws_subnet.philter_private_subnet_1.id]
+  vpc_zone_identifier       = [aws_subnet.philter_private_subnet_1.id, aws_subnet.philter_private_subnet_2.id]
   health_check_grace_period = 60
   health_check_type         = "ELB"
   load_balancers            = [aws_elb.philter_elb.name]
   tag {
     key                 = "Name"
-    value               = "tf-philter-var.philter_version"
+    value               = "tf-philter-${var.philter_version}"
     propagate_at_launch = true
   }
 }
