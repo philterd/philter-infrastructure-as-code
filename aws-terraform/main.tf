@@ -171,7 +171,7 @@ resource "aws_elb" "philter_elb" {
     healthy_threshold   = 2
     unhealthy_threshold = 10
     timeout             = 10
-    target              = "HTTPS:880/api/status"
+    target              = "HTTPS:8080/api/status"
     interval            = 30
   }
   listener {
