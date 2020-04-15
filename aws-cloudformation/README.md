@@ -4,9 +4,15 @@
 
 This template creates a VPC, load balancer, [Philter](https://www.mtnfog.com/products/philter/) EC2 instances, a Redis cache, and all required networking and security group configuration. Click the Launch Stack button to begin launching the stack.
 
-The benefits of using this CloudFormation template is that it provides a pre-configured Philter architecture and deployment that is highly-available, scalable, and encrypts all data in-transit and all data at rest. Your API requests to Philter to filter sensitive information from text will have higher throughput since the load balancer will distribute those requests across the Philter instances. And as described below, the stack uses end-to-end encryption of data at-rest and in-transit.
+You are encouraged to use these scripts as a starting point for creating your own Philter deployment. Feel free to fork this repository and customize as needed. We appreciate any contributions you would like to make by pull request.
+
+## Quick Notes
 
 The stack requires an active subscription to Philter via the [AWS Marketplace](https://aws.amazon.com/marketplace/pp/B07YVB8FFT). The template supports us-east-1, us-east-2, us-west-1, and us-west-2 regions.
+
+## Benefits
+
+The benefits of using this CloudFormation template is that it provides a pre-configured Philter architecture and deployment that is highly-available, scalable, and encrypts all data in-transit and all data at rest. Your API requests to Philter to filter sensitive information from text will have higher throughput since the load balancer will distribute those requests across the Philter instances. And as described below, the stack uses end-to-end encryption of data at-rest and in-transit.
 
 ## Architecture Diagram
 

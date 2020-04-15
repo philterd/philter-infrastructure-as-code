@@ -3,20 +3,25 @@ provider "aws" {
   version = "~> 2.57"
 }
 
-variable "region_ami" {
-  type = map(string)
-  default = {
-    us-east-1 = "ami-02447712b95a2b6ef"
-    us-east-2 = "ami-0ee73da0d2a7032f6"
-    us-west-1 = "ami-0ce182a9c2c4f368e"
-    us-west-2 = "ami-0873538d8179fde10"
+# This block looks up the latest version of Philter
+# and retrieves its AMI for the execution region.
+data "aws_ami" "philter_ami" {
+  most_recent = true
+  owners      = ["aws-marketplace"]
+  filter {
+    name   = "product-code"
+    values = ["7jr2as9jakzphur4tldb0yfuu"]
+  }
+  filter {
+    name   = "description"
+    values = ["philter ${var.philter_version}*"]
   }
 }
 
 data "aws_availability_zones" "region_azs" {}
 
 data "template_file" "user_data" {
-  template = "${file("${path.module}/userdata.sh")}"
+  template = file("${path.module}/userdata.sh")
   vars = {
     cache_host       = aws_elasticache_replication_group.philter_cache_replication_group.primary_endpoint_address
     cache_auth_token = var.cache_auth_token
@@ -154,8 +159,8 @@ resource "aws_security_group" "philter_sg" {
 }
 
 resource "aws_security_group" "philter_cache_sg" {
-  name        = "tf-philter-cache-sg"
-  vpc_id      = aws_vpc.philter_vpc.id
+  name   = "tf-philter-cache-sg"
+  vpc_id = aws_vpc.philter_vpc.id
   ingress {
     from_port       = 6379
     to_port         = 6379
@@ -187,7 +192,7 @@ resource "aws_elb" "philter_elb" {
 
 resource "aws_launch_configuration" "philter_launch_configuration" {
   depends_on = [aws_elasticache_replication_group.philter_cache_replication_group]
-  image_id                    = "${var.region_ami["${var.aws_region}"]}"
+  image_id                    = data.aws_ami.philter_ami.id
   instance_type               = var.instance_type
   security_groups             = [aws_security_group.philter_sg.id]
   associate_public_ip_address = false
