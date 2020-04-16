@@ -724,7 +724,7 @@
       ],
       "Condition": "BastionCondition",
       "Properties": {
-        "GroupName": {
+        "GroupId": {
           "Ref": "PhilterSecurityGroup"
         },
         "IpProtocol": "tcp",
