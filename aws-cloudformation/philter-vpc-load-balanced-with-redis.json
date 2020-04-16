@@ -424,17 +424,6 @@
           "Ref": "PhilterMinInstances"
         },
         "HealthCheckGracePeriod": 60,
-        "KeyName": {
-          "Fn::If": [
-            "HasKeyName",
-            {
-              "Ref": "KeyName"
-            },
-            {
-              "Ref": "AWS::NoValue"
-            }
-          ]
-        },
         "LaunchConfigurationName": {
           "Ref": "LaunchConfig"
         },
@@ -502,6 +491,17 @@
             }
           }
         ],
+        "KeyName": {
+          "Fn::If": [
+            "HasKeyName",
+            {
+              "Ref": "KeyName"
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
         "ImageId": {
           "Fn::FindInMap": [
             "RegionMap",
