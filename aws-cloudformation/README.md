@@ -14,17 +14,23 @@ The stack requires an active subscription to Philter via the [AWS Marketplace](h
 
 The benefits of using this CloudFormation template is that it provides a pre-configured Philter architecture and deployment that is highly-available, scalable, and encrypts all data in-transit and all data at rest. Your API requests to Philter to filter sensitive information from text will have higher throughput since the load balancer will distribute those requests across the Philter instances. And as described below, the stack uses end-to-end encryption of data at-rest and in-transit.
 
-## Architecture Diagram
+## Architecture
 
 ![Philter Architecture](https://github.com/mtnfog/philter-infrastructure-as-code/blob/master/aws-cloudformation/philter-cloudformation-redis-arch.png?raw=true)
 
 The deployment creates an elastic load balancer that is attached to an auto-scaled group of Philter EC2 instances. The load balancer spans two public subnets and the Philter EC2 instances are spread across two private subnets. Also in the private subnets is an Amazon Elasticache for Redis replication group. A NAT Gateway located in one of the public subnets provides outgoing internet access by routing the traffic to the VPC’s Internet Gateway.
 
+### Monitoring and Autoscaling
+
 The load balancer will monitor the status of each Philter EC2 instance by periodically checking the /api/status endpoint. If an instance is found to be unhealthy after failing several consecutive health checks the failing instance will be replaced.
 
 The Philter auto-scaling group is set to scale up and down based on the average CPU utilization of the Philter EC2 instances. When the CPU usage hits the high threshold another Philter EC2 instance will be added. When the CPU usage hits the low threshold, the auto-scaling group will begin removing (and terminating) instances from the group. The scaling policy is set to scale up faster rate than scaling down to avoid scaling down too quickly.
 
-## End-to-end Encryption
+### SSH Access
+
+The template can optionally create a bastion EC2 instance in the public subnet. The bastion EC2 instance is not created by default and can be enabled by setting the value of the `CreateBastionInstance` parameter to `true` when creating the stack. When creating a bastion EC2 instance, it's important to also provide a value for the `KeyName` parameter so you are able to SSH into the bastion instance.
+
+### End-to-end Encryption
 
 Incoming traffic to the load balancer is received by a TCP protocol handler on port 8080. These requests are distributed across the available Philter EC2 instances. The encrypted incoming traffic is terminated at the Philter EC2 instances. Network traffic between the Elasticache for Redis nodes is encrypted, and the data at-rest in the cache is also encrypted. The Philter EC2 instances use encrypted EBS volumes.
 

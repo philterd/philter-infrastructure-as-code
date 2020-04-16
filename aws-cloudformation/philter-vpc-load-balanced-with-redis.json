@@ -12,6 +12,7 @@
       "Default": "v131",
       "Type": "String",
       "AllowedValues": [
+        "v140",
         "v131",
         "v130",
         "v120",
@@ -41,12 +42,32 @@
       "Description": "The maximum number of Philter instances",
       "Type": "Number",
       "Default": 10
+    },
+    "KeyName": {
+      "Description": "The name of keypair for instances ('none' for none)",
+      "Type": "String",
+      "Default": ""
+    },
+    "CreateBastionInstance": {
+      "Description": "Set to true to create a bastion EC2 instance",
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "ConstraintDescription": "Must be true or false"
+    },
+    "BastionSourceCidr": {
+      "Description": "The source CIDR for SSH access to the bastion",
+      "Type": "String",
+      "Default": "0.0.0.0/0"
     }
   },
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
-        "v140": "",
+        "v140": "ami-09a429e63bdf9fca7",
         "v131": "ami-02447712b95a2b6ef",
         "v130": "ami-056684370df7a6369",
         "v120": "ami-066aee69a0f5d29cf",
@@ -55,7 +76,7 @@
         "v100": "ami-027220e1960d5d016"
       },
       "us-east-2": {
-        "v140": "",
+        "v140": "ami-036234eb8faafa848",
         "v131": "ami-0ee73da0d2a7032f6",
         "v130": "ami-0f2bd945e895513c2",
         "v120": "ami-0a5f4375eb546c31e",
@@ -64,7 +85,7 @@
         "v100": "ami-0e8e5bd70ed6d6fdd"
       },
       "us-west-1": {
-        "v140": "",
+        "v140": "ami-08d3397db5ba9665d",
         "v131": "ami-0ce182a9c2c4f368e",
         "v130": "ami-0990880fb27e33219",
         "v120": "ami-009292b69d3c53c4c",
@@ -73,7 +94,7 @@
         "v100": "ami-0f984901cc0f822d3"
       },
       "us-west-2": {
-        "v140": "",
+        "v140": "ami-0eaff58b8ffdefa92",
         "v131": "ami-0873538d8179fde10",
         "v130": "ami-0c2a8f82fb0af9f53",
         "v120": "ami-0619eb5ebfe14e9f5",
@@ -81,6 +102,28 @@
         "v101": "ami-0ae4843578c7cfdc7",
         "v100": "ami-0794c35ebe9e36b19"
       }
+    }
+  },
+  "Conditions": {
+    "BastionCondition": {
+      "Fn::Equals": [
+        {
+          "Ref": "CreateBastionInstance"
+        },
+        "true"
+      ]
+    },
+    "HasKeyName": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            "none",
+            {
+              "Ref": "KeyName"
+            }
+          ]
+        }
+      ]
     }
   },
   "Resources": {
@@ -334,6 +377,39 @@
         ]
       }
     },
+    "BastionInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Condition": "BastionCondition",
+      "Properties": {
+        "ImageId": "ami-0323c3dd2da7fb37d",
+        "InstanceType": "t3.nano",
+        "KeyName": {
+          "Fn::If": [
+            "HasKeyName",
+            {
+              "Ref": "KeyName"
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "BastionSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "PhilterPublicSubnet1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Philter Bastion"
+          }
+        ]
+      }
+    },
     "PhilterAutoScalingGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
@@ -341,6 +417,17 @@
           "Ref": "PhilterMinInstances"
         },
         "HealthCheckGracePeriod": 60,
+        "KeyName": {
+          "Fn::If": [
+            "HasKeyName",
+            {
+              "Ref": "KeyName"
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
         "LaunchConfigurationName": {
           "Ref": "LaunchConfig"
         },
@@ -614,6 +701,45 @@
             "ToPort": "8080",
             "SourceSecurityGroupId": {
               "Ref": "LoadBalancerSecurityGroup"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        }
+      }
+    },
+    "PhilterInstanceBastionSecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "DependsOn": "PhilterSecurityGroup",
+      "Condition": "BastionCondition",
+      "Properties": {
+        "GroupName": {
+          "Ref": "PhilterSecurityGroup"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": 22,
+        "ToPort": 22,
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "PhilterSecurityGroup",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "BastionSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Condition": "BastionCondition",
+      "Properties": {
+        "GroupDescription": "Security group for bastion",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": {
+              "Ref": "BastionSourceCidr"
             }
           }
         ],

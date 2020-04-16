@@ -187,6 +187,36 @@ resource "aws_security_group" "philter_cache_sg" {
   }
 }
 
+resource "aws_security_group" "philter_bastion_sg" {
+  count = var.create_bastion_instance ? 1 : 0
+  name        = "tf-philter-bastion-sg"
+  description = "Controls access to the bastion instance"
+  vpc_id      = aws_vpc.philter_vpc.id
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    cidr_blocks = [var.bastion_ssh_cidr]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "philter_bastion_instance" {
+  ami           = "ami-0323c3dd2da7fb37d"
+  instance_type = "t3.nano"
+  key_name = var.instance_keyname
+  security_groups = [aws_security_group.philter_bastion_sg.id]
+  subnet_id = aws_subnet.philter_public_subnet_1.id
+  tags = {
+    Name = "tf-philter-bastion"
+  }
+}
+
 resource "aws_elb" "philter_elb" {
   subnets         = [aws_subnet.philter_public_subnet_1.id, aws_subnet.philter_public_subnet_2.id]
   security_groups = [aws_security_group.philter_elb_sg.id]
@@ -224,19 +254,20 @@ resource "aws_launch_configuration" "philter_launch_configuration" {
 }
 
 resource "aws_autoscaling_group" "philter_autoscaling_group" {
-  launch_configuration      = aws_launch_configuration.philter_launch_configuration.name
-  min_size                  = 2
-  max_size                  = 10
   desired_capacity          = 2
-  vpc_zone_identifier       = [aws_subnet.philter_private_subnet_1.id, aws_subnet.philter_private_subnet_2.id]
   health_check_grace_period = 60
   health_check_type         = "ELB"
+  key_name = var.instance_keyname
+  launch_configuration      = aws_launch_configuration.philter_launch_configuration.name
   load_balancers            = [aws_elb.philter_elb.name]
+  max_size                  = 10
+  min_size                  = 2
   tag {
     key                 = "Name"
     value               = "tf-philter-${var.philter_version}"
     propagate_at_launch = true
   }
+  vpc_zone_identifier       = [aws_subnet.philter_private_subnet_1.id, aws_subnet.philter_private_subnet_2.id]
 }
 
 resource "aws_elasticache_subnet_group" "philter_cache_subnet_group" {
