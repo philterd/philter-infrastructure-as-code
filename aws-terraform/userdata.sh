@@ -1,5 +1,4 @@
 #!/bin/bash
-sudo rm /opt/philter/application.properties
 echo "server.port=8080" | sudo tee -a /opt/philter/application.properties
 echo "logging.level.root=INFO" | sudo tee -a /opt/philter/application.properties
 echo "model.file=/opt/philter/final-model.pt" | sudo tee -a /opt/philter/application.properties
