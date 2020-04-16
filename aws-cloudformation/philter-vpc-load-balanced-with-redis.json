@@ -9,7 +9,7 @@
     },
     "PhilterVersion": {
       "Description": "The version of Philter to deploy",
-      "Default": "v131",
+      "Default": "v140",
       "Type": "String",
       "AllowedValues": [
         "v140",
@@ -46,12 +46,12 @@
     "KeyName": {
       "Description": "The name of keypair for instances ('none' for none)",
       "Type": "String",
-      "Default": ""
+      "Default": "mtnfog"
     },
     "CreateBastionInstance": {
       "Description": "Set to true to create a bastion EC2 instance",
       "Type": "String",
-      "Default": "false",
+      "Default": "true",
       "AllowedValues": [
         "true",
         "false"
@@ -288,10 +288,6 @@
     "PhilterPublicSubnet1": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "VpcId": {
-          "Ref": "PhilterVPC"
-        },
-        "CidrBlock": "10.50.0.0/24",
         "AvailabilityZone": {
           "Fn::Select": [
             "0",
@@ -300,21 +296,22 @@
             }
           ]
         },
+        "CidrBlock": "10.50.0.0/24",
+        "MapPublicIpOnLaunch": true,
         "Tags": [
           {
             "Key": "Name",
             "Value": "philter-public-subnet-1"
           }
-        ]
+        ],
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        }
       }
     },
     "PhilterPublicSubnet2": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "VpcId": {
-          "Ref": "PhilterVPC"
-        },
-        "CidrBlock": "10.50.1.0/24",
         "AvailabilityZone": {
           "Fn::Select": [
             "1",
@@ -323,21 +320,22 @@
             }
           ]
         },
+        "CidrBlock": "10.50.1.0/24",
+        "MapPublicIpOnLaunch": true,
         "Tags": [
           {
             "Key": "Name",
             "Value": "philter-public-subnet-2"
           }
-        ]
+        ],
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        }
       }
     },
     "PhilterPrivateSubnet1": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "VpcId": {
-          "Ref": "PhilterVPC"
-        },
-        "CidrBlock": "10.50.2.0/24",
         "AvailabilityZone": {
           "Fn::Select": [
             "0",
@@ -346,21 +344,21 @@
             }
           ]
         },
+        "CidrBlock": "10.50.2.0/24",
         "Tags": [
           {
             "Key": "Name",
             "Value": "philter-private-subnet-1"
           }
-        ]
+        ],
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        }
       }
     },
     "PhilterPrivateSubnet2": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "VpcId": {
-          "Ref": "PhilterVPC"
-        },
-        "CidrBlock": "10.50.3.0/24",
         "AvailabilityZone": {
           "Fn::Select": [
             "1",
@@ -369,12 +367,16 @@
             }
           ]
         },
+        "CidrBlock": "10.50.3.0/24",
         "Tags": [
           {
             "Key": "Name",
             "Value": "philter-private-subnet-2"
           }
-        ]
+        ],
+        "VpcId": {
+          "Ref": "PhilterVPC"
+        }
       }
     },
     "BastionInstance": {
