@@ -41,7 +41,7 @@ Incoming traffic to the load balancer is received by a TCP protocol handler on p
 Click the Launch Stack button to launch the stack in your AWS account, or get the template here, or launch the stack using the AWS CLI with the command below.
 
 ```
-aws cloudformation create-stack --stack-name philter --template-url s3://mtnfog-public/philter-resources/philter-vpc-load-balanced-with-redis.json
+aws cloudformation create-stack --stack-name philter --template-url s3://mtnfog-public/philter-resources/philter-vpc-load-balanced-with-redis.json --capabilities CAPABILITY_IAM
 ```
 
 Once the stack completes Philter will be ready to accept requests. There will be an Output value called `PhilterEndpoint`. This value is the Philter API URL.

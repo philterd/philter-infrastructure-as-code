@@ -9,9 +9,10 @@
     },
     "PhilterVersion": {
       "Description": "The version of Philter to deploy",
-      "Default": "v140",
+      "Default": "v150",
       "Type": "String",
       "AllowedValues": [
+        "v150",
         "v140",
         "v131",
         "v130",
@@ -67,11 +68,22 @@
       "Description": "The source CIDR for SSH access to the bastion",
       "Type": "String",
       "Default": "0.0.0.0/0"
+    },
+    "FilterProfilesBucketName": {
+      "Description": "The name of the S3 bucket to store the filter profiles",
+      "Type": "String",
+      "Default": "mtnfog-filter-profiles"
+    },
+    "FilterProfilesBucketPrefix": {
+      "Description": "The bucket prefix for the filter profiles",
+      "Type": "String",
+      "Default": "/"
     }
   },
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
+        "v150": "ami-09a37d322828dee36",
         "v140": "ami-09a429e63bdf9fca7",
         "v131": "ami-02447712b95a2b6ef",
         "v130": "ami-056684370df7a6369",
@@ -132,6 +144,116 @@
     }
   },
   "Resources": {
+    "FilterProfilesBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BucketName": {
+          "Ref": "FilterProfilesBucketName"
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      }
+    },
+    "PhilterInstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "RolePolicies": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "philter-s3-bucket-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:ListBucket"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "FilterProfilesBucketName"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "FilterProfilesBucketName"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "PhilterInstanceRole"
+          }
+        ]
+      }
+    },
+    "PhilterInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "PhilterInstanceRole"
+          }
+        ]
+      }
+    },
     "PhilterVPC": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
@@ -477,7 +599,10 @@
     },
     "LaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
-      "DependsOn": "PhilterCache",
+      "DependsOn": [
+        "PhilterCache",
+        "FilterProfilesBucket"
+      ],
       "Properties": {
         "AssociatePublicIpAddress": "false",
         "BlockDeviceMappings": [
@@ -491,16 +616,8 @@
             }
           }
         ],
-        "KeyName": {
-          "Fn::If": [
-            "HasKeyName",
-            {
-              "Ref": "KeyName"
-            },
-            {
-              "Ref": "AWS::NoValue"
-            }
-          ]
+        "IamInstanceProfile": {
+          "Ref": "PhilterInstanceProfile"
         },
         "ImageId": {
           "Fn::FindInMap": [
@@ -510,6 +627,17 @@
             },
             {
               "Ref": "PhilterVersion"
+            }
+          ]
+        },
+        "KeyName": {
+          "Fn::If": [
+            "HasKeyName",
+            {
+              "Ref": "KeyName"
+            },
+            {
+              "Ref": "AWS::NoValue"
             }
           ]
         },
@@ -543,6 +671,21 @@
                 "echo 'anonymization.cache.service.redis.auth.token=",
                 {
                   "Ref": "CacheAuthToken"
+                },
+                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'filter.profiles.s3.bucket=",
+                {
+                  "Ref": "FilterProfilesBucketName"
+                },
+                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'filter.profiles.s3.prefix=",
+                {
+                  "Ref": "FilterProfilesBucketPrefix"
+                },
+                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'filter.profiles.s3.region=",
+                {
+                  "Ref": "AWS::Region"
                 },
                 "\n' | sudo tee -a /opt/philter/application.properties\n",
                 "sudo systemctl restart philter.service\n",
