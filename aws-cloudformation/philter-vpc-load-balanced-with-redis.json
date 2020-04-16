@@ -83,7 +83,7 @@
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
-        "v150": "ami-09a37d322828dee36",
+        "v150": "ami-0051b62fabd3ef531",
         "v140": "ami-09a429e63bdf9fca7",
         "v131": "ami-02447712b95a2b6ef",
         "v130": "ami-056684370df7a6369",
@@ -662,11 +662,21 @@
               [
                 "#!/bin/bash\n",
                 "rm /opt/philter/application.properties\n",
+                "echo '# General settings' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'server.port=8080' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'logging.level.root=INFO' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'model.file=/opt/philter/final-model.pt' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'anonymization.cache.service.redis.enabled=true' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'anonymization.cache.service.redis.host=",
+
+                "echo '# SSL certificate settings' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'server.ssl.key-store-type=PKCS12' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'server.ssl.key-store=/opt/philter/ssl/philter.p12' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'server.ssl.key-store-password=Password123!' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'server.ssl.key-alias=philter' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'security.require-ssl=true' | sudo tee -a /opt/philter/application.properties\n",
+
+                "echo '# Cache settings' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.enabled=true' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.host=",
                 {
                   "Fn::GetAtt": [
                     "PhilterCache",
@@ -674,12 +684,16 @@
                   ]
                 },
                 "\n' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'anonymization.cache.service.redis.port=6379\n' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'anonymization.cache.service.redis.auth.token=",
+                "echo 'cache.redis.port=6379\n' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.auth.token=",
                 {
                   "Ref": "CacheAuthToken"
                 },
                 "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.ssl=true' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.cluster=true' | sudo tee -a /opt/philter/application.properties\n",
+
+                "echo '# Filter profiles settings' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'filter.profiles.s3.bucket=",
                 {
                   "Ref": "FilterProfilesBucketName"
