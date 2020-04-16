@@ -170,6 +170,15 @@ resource "aws_security_group" "philter_sg" {
   }
 }
 
+resource "aws_security_group_rule" "philter_bastion_sg_rule" {
+  count             = var.create_bastion_instance ? 1 : 0
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  security_group_id = [aws_security_group.philter_bastion_sg.id]
+}
+
 resource "aws_security_group" "philter_cache_sg" {
   name   = "tf-philter-cache-sg"
   vpc_id = aws_vpc.philter_vpc.id
@@ -188,14 +197,14 @@ resource "aws_security_group" "philter_cache_sg" {
 }
 
 resource "aws_security_group" "philter_bastion_sg" {
-  count = var.create_bastion_instance ? 1 : 0
+  count       = var.create_bastion_instance ? 1 : 0
   name        = "tf-philter-bastion-sg"
   description = "Controls access to the bastion instance"
   vpc_id      = aws_vpc.philter_vpc.id
   ingress {
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
     cidr_blocks = [var.bastion_ssh_cidr]
   }
   egress {
@@ -207,11 +216,11 @@ resource "aws_security_group" "philter_bastion_sg" {
 }
 
 resource "aws_instance" "philter_bastion_instance" {
-  ami           = "ami-0323c3dd2da7fb37d"
-  instance_type = "t3.nano"
-  key_name = var.instance_keyname
+  ami             = "ami-0323c3dd2da7fb37d"
+  instance_type   = "t3.nano"
+  key_name        = var.instance_keyname
   security_groups = [aws_security_group.philter_bastion_sg.id]
-  subnet_id = aws_subnet.philter_public_subnet_1.id
+  subnet_id       = aws_subnet.philter_public_subnet_1.id
   tags = {
     Name = "tf-philter-bastion"
   }
@@ -239,7 +248,7 @@ resource "aws_elb" "philter_elb" {
 }
 
 resource "aws_launch_configuration" "philter_launch_configuration" {
-  depends_on = [aws_elasticache_replication_group.philter_cache_replication_group]
+  depends_on                  = [aws_elasticache_replication_group.philter_cache_replication_group]
   image_id                    = data.aws_ami.philter_ami.id
   instance_type               = var.instance_type
   security_groups             = [aws_security_group.philter_sg.id]
@@ -257,7 +266,7 @@ resource "aws_autoscaling_group" "philter_autoscaling_group" {
   desired_capacity          = 2
   health_check_grace_period = 60
   health_check_type         = "ELB"
-  key_name = var.instance_keyname
+  key_name                  = var.instance_keyname
   launch_configuration      = aws_launch_configuration.philter_launch_configuration.name
   load_balancers            = [aws_elb.philter_elb.name]
   max_size                  = 10
@@ -267,7 +276,7 @@ resource "aws_autoscaling_group" "philter_autoscaling_group" {
     value               = "tf-philter-${var.philter_version}"
     propagate_at_launch = true
   }
-  vpc_zone_identifier       = [aws_subnet.philter_private_subnet_1.id, aws_subnet.philter_private_subnet_2.id]
+  vpc_zone_identifier = [aws_subnet.philter_private_subnet_1.id, aws_subnet.philter_private_subnet_2.id]
 }
 
 resource "aws_elasticache_subnet_group" "philter_cache_subnet_group" {
