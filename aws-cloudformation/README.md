@@ -10,6 +10,8 @@ You are encouraged to use these scripts as a starting point for creating your ow
 
 The stack requires an active subscription to Philter via the [AWS Marketplace](https://aws.amazon.com/marketplace/pp/B07YVB8FFT). The template supports us-east-1, us-east-2, us-west-1, and us-west-2 regions.
 
+The stack does not create an instance of Elastisearch to enable Philter's optional replacement store.
+
 ## Benefits
 
 The benefits of using this CloudFormation template is that it provides a pre-configured Philter architecture and deployment that is highly-available, scalable, and encrypts all data in-transit and all data at rest. Your API requests to Philter to filter sensitive information from text will have higher throughput since the load balancer will distribute those requests across the Philter instances. And as described below, the stack uses end-to-end encryption of data at-rest and in-transit.

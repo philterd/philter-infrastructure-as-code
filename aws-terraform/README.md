@@ -10,6 +10,8 @@ The script looks up the Philter AMI for the latest version of Philter when `terr
 
 The stack requires an active subscription to Philter via the [AWS Marketplace](https://aws.amazon.com/marketplace/pp/B07YVB8FFT). The template supports all AWS regions.
 
+The stack does not create an instance of Elastisearch to enable Philter's optional replacement store.
+
 ## Benefits
 
 The benefits of using these Terraform scripts is that they provide a pre-configured Philter architecture and deployment that is highly-available, scalable, and encrypts all data in-transit and all data at rest. Your API requests to Philter to filter sensitive information from text will have higher throughput since the load balancer will distribute those requests across the Philter instances. And as described below, the stack uses end-to-end encryption of data at-rest and in-transit.
