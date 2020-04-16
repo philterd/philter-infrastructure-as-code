@@ -72,7 +72,7 @@
     "FilterProfilesBucketName": {
       "Description": "The name of the S3 bucket to store the filter profiles",
       "Type": "String",
-      "Default": "mtnfog-filter-profiles"
+      "Default": "my-filter-profiles"
     },
     "FilterProfilesBucketPrefix": {
       "Description": "The bucket prefix for the filter profiles",
@@ -159,6 +159,12 @@
               }
             }
           ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+          "BlockPublicPolicy": true,
+          "RestrictPublicBuckets": true
         },
         "VersioningConfiguration": {
           "Status": "Enabled"
@@ -655,6 +661,7 @@
               "",
               [
                 "#!/bin/bash\n",
+                "rm /opt/philter/application.properties\n",
                 "echo 'server.port=8080' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'logging.level.root=INFO' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'model.file=/opt/philter/final-model.pt' | sudo tee -a /opt/philter/application.properties\n",
