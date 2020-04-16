@@ -33,6 +33,11 @@
       ],
       "ConstraintDescription": "Must be a valid Philter EC2 instance type."
     },
+    "PhilterCacheNodeType": {
+      "Description": "The Elasticache node type",
+      "Type": "String",
+      "Default": "cache.t3.small"
+    },
     "PhilterMinInstances": {
       "Description": "The minimum number of Philter instances",
       "Type": "Number",
@@ -713,7 +718,10 @@
     },
     "PhilterInstanceBastionSecurityGroupIngress": {
       "Type": "AWS::EC2::SecurityGroupIngress",
-      "DependsOn": "PhilterSecurityGroup",
+      "DependsOn": [
+        "PhilterSecurityGroup",
+        "BastionSecurityGroup"
+      ],
       "Condition": "BastionCondition",
       "Properties": {
         "GroupName": {
@@ -723,10 +731,7 @@
         "FromPort": 22,
         "ToPort": 22,
         "SourceSecurityGroupId": {
-          "Fn::GetAtt": [
-            "PhilterSecurityGroup",
-            "GroupId"
-          ]
+          "Ref": "BastionSecurityGroup"
         }
       }
     },
@@ -794,7 +799,9 @@
         "ReplicationGroupDescription": "Philter cache replication group",
         "NumCacheClusters": 2,
         "Engine": "redis",
-        "CacheNodeType": "cache.t3.small",
+        "CacheNodeType": {
+          "Ref": "PhilterCacheNodeType"
+        },
         "AutoMinorVersionUpgrade": true,
         "AutomaticFailoverEnabled": true,
         "CacheSubnetGroupName": {

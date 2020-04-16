@@ -296,7 +296,7 @@ resource "aws_elasticache_replication_group" "philter_cache_replication_group" {
   engine_version                = "5.0.6"
   port                          = 6379
   number_cache_clusters         = 2
-  node_type                     = "cache.t3.small"
+  node_type                     = var.cache_node_type
   replication_group_id          = "tf-philter-cache-replication-group"
   replication_group_description = "Philter replication group"
   security_group_ids            = [aws_security_group.philter_cache_sg.id]

@@ -22,6 +22,12 @@ variable "cache_auth_token" {
   default     = "L3H9dZh3UPwTvLUS"
 }
 
+variable "cache_node_type" {
+  type = string
+  description = "The Elasticache node type"
+  default = "cache.t3.small"
+}
+
 variable "instance_keyname" {
   type        = string
   description = "SSH keyname for EC2 instances"
