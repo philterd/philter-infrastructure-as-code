@@ -46,12 +46,12 @@
     "KeyName": {
       "Description": "The name of keypair for instances ('none' for none)",
       "Type": "String",
-      "Default": "mtnfog"
+      "Default": ""
     },
     "CreateBastionInstance": {
       "Description": "Set to true to create a bastion EC2 instance",
       "Type": "String",
-      "Default": "true",
+      "Default": "false",
       "AllowedValues": [
         "true",
         "false"
