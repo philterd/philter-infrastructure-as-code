@@ -803,7 +803,6 @@
           "Ref": "PhilterCacheNodeType"
         },
         "AutoMinorVersionUpgrade": true,
-        "AutomaticFailoverEnabled": true,
         "CacheSubnetGroupName": {
           "Ref": "PhilterCacheSubnetGroup"
         },
@@ -834,6 +833,15 @@
             },
             ":8080/"
           ]
+        ]
+      }
+    },
+    "PhilterELBDNSName": {
+      "Description": "Philter load balancer DNS name",
+      "Value": {
+        "Fn::GetAtt": [
+          "PhilterLoadBalancer",
+          "DNSName"
         ]
       }
     }
