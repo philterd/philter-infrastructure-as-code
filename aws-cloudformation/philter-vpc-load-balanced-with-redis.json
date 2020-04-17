@@ -683,32 +683,32 @@
                     "PrimaryEndPoint.Address"
                   ]
                 },
-                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'cache.redis.port=6379\n' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'cache.redis.auth.token=",
                 {
                   "Ref": "CacheAuthToken"
                 },
-                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'cache.redis.ssl=true' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'cache.redis.cluster=true' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.cluster=false' | sudo tee -a /opt/philter/application.properties\n",
 
                 "echo '# Filter profiles settings' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'filter.profiles.s3.bucket=",
                 {
                   "Ref": "FilterProfilesBucketName"
                 },
-                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'filter.profiles.s3.prefix=",
                 {
                   "Ref": "FilterProfilesBucketPrefix"
                 },
-                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'filter.profiles.s3.region=",
                 {
                   "Ref": "AWS::Region"
                 },
-                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "' | sudo tee -a /opt/philter/application.properties\n",
                 "sudo systemctl restart philter.service\n",
                 "sudo systemctl restart philter-ner.service\n",
                 "# Signal the status from cfn-init\n",
