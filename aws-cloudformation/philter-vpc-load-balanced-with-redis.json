@@ -222,9 +222,7 @@
             {
               "Effect": "Allow",
               "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:DeleteObject"
+                "s3:*"
               ],
               "Resource": [
                 {
@@ -708,7 +706,7 @@
                 {
                   "Ref": "AWS::Region"
                 },
-                "' | sudo tee -a /opt/philter/application.properties\n",
+                " ' | sudo tee -a /opt/philter/application.properties\n",
                 "sudo systemctl restart philter.service\n",
                 "sudo systemctl restart philter-ner.service\n",
                 "# Signal the status from cfn-init\n",
