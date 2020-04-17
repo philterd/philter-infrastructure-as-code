@@ -213,7 +213,8 @@
                       "arn:aws:s3:::",
                       {
                         "Ref": "FilterProfilesBucketName"
-                      }
+                      },
+                      "/*"
                     ]
                   ]
                 }
