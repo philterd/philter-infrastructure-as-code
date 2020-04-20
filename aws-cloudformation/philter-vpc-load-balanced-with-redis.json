@@ -665,14 +665,12 @@
                 "echo 'server.port=8080' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'logging.level.root=INFO' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'model.file=/opt/philter/final-model.pt' | sudo tee -a /opt/philter/application.properties\n",
-
                 "echo '# SSL certificate settings' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'server.ssl.key-store-type=PKCS12' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'server.ssl.key-store=/opt/philter/ssl/philter.p12' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'server.ssl.key-store-password=Password123!' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'server.ssl.key-alias=philter' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'security.require-ssl=true' | sudo tee -a /opt/philter/application.properties\n",
-
                 "echo '# Cache settings' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'cache.redis.enabled=true' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'cache.redis.host=",
@@ -691,7 +689,6 @@
                 "' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'cache.redis.ssl=true' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'cache.redis.cluster=false' | sudo tee -a /opt/philter/application.properties\n",
-
                 "echo '# Filter profiles settings' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'filter.profiles.s3.bucket=",
                 {
@@ -966,7 +963,6 @@
           "Ref": "PhilterCacheNodeType"
         },
         "AutoMinorVersionUpgrade": true,
-        "AutomaticFailoverEnabled": true,
         "CacheSubnetGroupName": {
           "Ref": "PhilterCacheSubnetGroup"
         },
@@ -997,6 +993,21 @@
             },
             ":8080/"
           ]
+        ]
+      }
+    },
+    "PhilterELBName": {
+      "Description": "The ID of the Philter load balancer",
+      "Value": {
+        "Ref": "PhilterLoadBalancer"
+      }
+    },
+    "PhilterELBDNSName": {
+      "Description": "Philter load balancer DNS name",
+      "Value": {
+        "Fn::GetAtt": [
+          "PhilterLoadBalancer",
+          "DNSName"
         ]
       }
     }
