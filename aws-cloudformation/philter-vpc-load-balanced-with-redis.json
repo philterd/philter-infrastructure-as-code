@@ -836,6 +836,12 @@
         ]
       }
     },
+    "PhilterELBName": {
+      "Description": "The ID of the Philter load balancer",
+      "Value": {
+        "Ref": "PhilterLoadBalancer"
+      }
+    },
     "PhilterELBDNSName": {
       "Description": "Philter load balancer DNS name",
       "Value": {
