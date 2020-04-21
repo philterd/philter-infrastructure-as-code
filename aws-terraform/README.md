@@ -8,7 +8,7 @@ You are encouraged to use these scripts as a starting point for creating your ow
 
 The script looks up the Philter AMI for the latest version of Philter when `terraform apply` is executed.
 
-The stack requires an active subscription to Philter via the [AWS Marketplace](https://aws.amazon.com/marketplace/pp/B07YVB8FFT). The template supports all AWS regions.
+The stack requires an active subscription to Philter via the [AWS Marketplace](https://aws.amazon.com/marketplace/pp/B07YVB8FFT?ref=_ptnr_mf_iact). The template supports all AWS regions.
 
 The stack does not create an instance of Elastisearch to enable Philter's optional replacement store.
 
