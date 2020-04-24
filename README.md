@@ -10,7 +10,7 @@ You are welcome to use these resources as-is or to customize them to meet your n
 |----------|--------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | AWS | [CloudFormation Template](https://github.com/mtnfog/philter-infrastructure-as-code/tree/master/aws-cloudformation/) | AWS CloudFormation template for a load-balanced, highly-available Philter deployment. | [![Launch Stack](https://github.com/mtnfog/philter-infrastructure-as-code/blob/master/aws-cloudformation/cloudformation-launch-stack.png?raw=true)](https://console.aws.amazon.com/cloudformation/home?#/stacks/create/review?stackName=philter&templateURL=https://mtnfog-public.s3.amazonaws.com/philter-resources/philter-vpc-load-balanced-with-redis.json) |
 | AWS | [Terraform Scripts](https://github.com/mtnfog/philter-infrastructure-as-code/tree/master/aws-terraform/) | Terraform scripts for a load-balanced, highly-available Philter deployment. | |
-| AWS | [Terraform Module](https://github.com/mtnfog/philter-infrastructure-as-code/tree/master/aws-terraform-module) | Terraform module | |
+| AWS | [Terraform Module](https://github.com/mtnfog/philter-infrastructure-as-code/tree/master/aws-terraform-module) | Terraform module that creates a single Philter EC2 instance. | |
 ## License
 
 This project is licensed under the Apache License, version 2.0.
