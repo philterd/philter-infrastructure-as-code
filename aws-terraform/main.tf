@@ -176,7 +176,7 @@ resource "aws_security_group_rule" "philter_bastion_sg_rule" {
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  security_group_id = [aws_security_group.philter_bastion_sg.id]
+  security_group_id = aws_security_group.philter_bastion_sg[0].id
 }
 
 resource "aws_security_group" "philter_cache_sg" {
@@ -216,10 +216,11 @@ resource "aws_security_group" "philter_bastion_sg" {
 }
 
 resource "aws_instance" "philter_bastion_instance" {
+  count           = var.create_bastion_instance ? 1 : 0
   ami             = "ami-0323c3dd2da7fb37d"
   instance_type   = "t3.nano"
   key_name        = var.instance_keyname
-  security_groups = [aws_security_group.philter_bastion_sg.id]
+  security_groups = [aws_security_group.philter_bastion_sg[0].id]
   subnet_id       = aws_subnet.philter_public_subnet_1.id
   tags = {
     Name = "tf-philter-bastion"
@@ -253,6 +254,7 @@ resource "aws_launch_configuration" "philter_launch_configuration" {
   instance_type               = var.instance_type
   security_groups             = [aws_security_group.philter_sg.id]
   associate_public_ip_address = false
+  key_name                  = var.instance_keyname
   root_block_device {
     volume_type           = "gp2"
     volume_size           = 20
@@ -266,7 +268,6 @@ resource "aws_autoscaling_group" "philter_autoscaling_group" {
   desired_capacity          = 2
   health_check_grace_period = 60
   health_check_type         = "ELB"
-  key_name                  = var.instance_keyname
   launch_configuration      = aws_launch_configuration.philter_launch_configuration.name
   load_balancers            = [aws_elb.philter_elb.name]
   max_size                  = 10
