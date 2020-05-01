@@ -217,7 +217,7 @@
     "RolePolicies": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
-        "PolicyName": "philter-s3-bucket-policy",
+        "PolicyName": "philter-s3-policy",
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -234,8 +234,7 @@
                       "arn:aws:s3:::",
                       {
                         "Ref": "FilterProfilesBucketName"
-                      },
-                      "/*"
+                      }
                     ]
                   ]
                 }
@@ -254,7 +253,8 @@
                       "arn:aws:s3:::",
                       {
                         "Ref": "FilterProfilesBucketName"
-                      }
+                      },
+                      "/*"
                     ]
                   ]
                 }
