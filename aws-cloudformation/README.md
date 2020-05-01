@@ -8,7 +8,7 @@ You are encouraged to use these scripts as a starting point for creating your ow
 
 ## Quick Notes
 
-The stack requires an active subscription to Philter via the [AWS Marketplace](https://aws.amazon.com/marketplace/pp/B07YVB8FFT?ref=_ptnr_mf_iaccf). The template supports us-east-1, us-east-2, us-west-1, and us-west-2 regions.
+The stack requires an active subscription to Philter via the [AWS Marketplace](https://aws.amazon.com/marketplace/pp/B07YVB8FFT?ref=_ptnr_mf_iaccf). The template supports us-east-1, us-east-2, us-west-1, us-west-2, us-gov-east-1, and us-gov-west-2 regions.
 
 The stack does not create an instance of Elastisearch to enable Philter's optional replacement store.
 
