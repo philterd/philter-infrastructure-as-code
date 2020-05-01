@@ -9,10 +9,9 @@
     },
     "PhilterVersion": {
       "Description": "The version of Philter to deploy",
-      "Default": "v150",
+      "Default": "v140",
       "Type": "String",
       "AllowedValues": [
-        "v150",
         "v140",
         "v131",
         "v130",
@@ -81,7 +80,7 @@
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
-        "v150": "ami-0c45c7f52cef4c03e",
+        "v150": "",
         "v140": "ami-09a429e63bdf9fca7",
         "v131": "ami-02447712b95a2b6ef",
         "v130": "ami-056684370df7a6369",
