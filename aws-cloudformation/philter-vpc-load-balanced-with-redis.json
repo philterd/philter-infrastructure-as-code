@@ -51,8 +51,7 @@
     },
     "KeyName": {
       "Description": "The name of keypair for instances ('none' for none)",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     },
     "CreateBastionInstance": {
       "Description": "Set to true to create a bastion EC2 instance",
@@ -71,8 +70,7 @@
     },
     "FilterProfilesBucketName": {
       "Description": "The name of the S3 bucket to store the filter profiles",
-      "Type": "String",
-      "Default": "my-filter-profiles"
+      "Type": "String"
     },
     "FilterProfilesBucketPrefix": {
       "Description": "The bucket prefix for the filter profiles",
@@ -727,7 +725,7 @@
                 {
                   "Ref": "AWS::Region"
                 },
-                " ' | sudo tee -a /opt/philter/application.properties\n",
+                "' | sudo tee -a /opt/philter/application.properties\n",
                 "sudo systemctl restart philter.service\n",
                 "sudo systemctl restart philter-ner.service\n",
                 "# Signal the status from cfn-init\n",
@@ -1031,6 +1029,16 @@
         "Fn::GetAtt": [
           "PhilterLoadBalancer",
           "DNSName"
+        ]
+      }
+    },
+    "BastionPublicIPAddress": {
+      "Condition": "BastionCondition",
+      "Description": "Public IP address of the bastion instance",
+      "Value": {
+        "Fn::GetAtt": [
+          "BastionInstance",
+          "PublicIp"
         ]
       }
     }
