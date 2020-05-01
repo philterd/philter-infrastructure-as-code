@@ -186,9 +186,6 @@
           "IgnorePublicAcls": true,
           "BlockPublicPolicy": true,
           "RestrictPublicBuckets": true
-        },
-        "VersioningConfiguration": {
-          "Status": "Enabled"
         }
       }
     },
