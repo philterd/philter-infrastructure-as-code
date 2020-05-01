@@ -9,9 +9,10 @@
     },
     "PhilterVersion": {
       "Description": "The version of Philter to deploy",
-      "Default": "v140",
+      "Default": "v150",
       "Type": "String",
       "AllowedValues": [
+        "v150",
         "v140",
         "v131",
         "v130",
@@ -50,8 +51,7 @@
     },
     "KeyName": {
       "Description": "The name of keypair for instances ('none' for none)",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     },
     "CreateBastionInstance": {
       "Description": "Set to true to create a bastion EC2 instance",
@@ -67,11 +67,21 @@
       "Description": "The source CIDR for SSH access to the bastion",
       "Type": "String",
       "Default": "0.0.0.0/0"
+    },
+    "FilterProfilesBucketName": {
+      "Description": "The name of the S3 bucket to store the filter profiles",
+      "Type": "String"
+    },
+    "FilterProfilesBucketPrefix": {
+      "Description": "The bucket prefix for the filter profiles",
+      "Type": "String",
+      "Default": "/"
     }
   },
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
+        "v150": "ami-0c45c7f52cef4c03e",
         "v140": "ami-09a429e63bdf9fca7",
         "v131": "ami-02447712b95a2b6ef",
         "v130": "ami-056684370df7a6369",
@@ -81,6 +91,7 @@
         "v100": "ami-027220e1960d5d016"
       },
       "us-east-2": {
+        "v150": "",
         "v140": "ami-036234eb8faafa848",
         "v131": "ami-0ee73da0d2a7032f6",
         "v130": "ami-0f2bd945e895513c2",
@@ -90,6 +101,7 @@
         "v100": "ami-0e8e5bd70ed6d6fdd"
       },
       "us-west-1": {
+        "v150": "",
         "v140": "ami-08d3397db5ba9665d",
         "v131": "ami-0ce182a9c2c4f368e",
         "v130": "ami-0990880fb27e33219",
@@ -99,6 +111,7 @@
         "v100": "ami-0f984901cc0f822d3"
       },
       "us-west-2": {
+        "v150": "",
         "v140": "ami-0eaff58b8ffdefa92",
         "v131": "ami-0873538d8179fde10",
         "v130": "ami-0c2a8f82fb0af9f53",
@@ -106,6 +119,26 @@
         "v110": "ami-084642b32536f2911",
         "v101": "ami-0ae4843578c7cfdc7",
         "v100": "ami-0794c35ebe9e36b19"
+      },
+      "us-gov-east-1": {
+        "v150": "",
+        "v140": "ami-45cc2034",
+        "v131": "ami-f9cf2288",
+        "v130": "ami-8e7092ff",
+        "v120": "ami-1733d166",
+        "v110": "ami-fc7f9c8d",
+        "v101": "ami-88ab48f9",
+        "v100": "ami-3f4cac4e"
+      },
+      "us-gov-west-1": {
+        "v150": "",
+        "v140": "ami-018bba60",
+        "v131": "ami-cabd93ab",
+        "v130": "ami-48d8fb29",
+        "v120": "ami-4e28092f",
+        "v110": "ami-a26c37c3",
+        "v101": "ami-f36a3b92",
+        "v100": "ami-b3de89d2"
       }
     }
   },
@@ -132,6 +165,118 @@
     }
   },
   "Resources": {
+    "FilterProfilesBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BucketName": {
+          "Ref": "FilterProfilesBucketName"
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+          "BlockPublicPolicy": true,
+          "RestrictPublicBuckets": true
+        }
+      }
+    },
+    "PhilterInstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "RolePolicies": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "philter-s3-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:ListBucket"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "FilterProfilesBucketName"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "FilterProfilesBucketName"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "PhilterInstanceRole"
+          }
+        ]
+      }
+    },
+    "PhilterInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "PhilterInstanceRole"
+          }
+        ]
+      }
+    },
     "PhilterVPC": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
@@ -477,7 +622,10 @@
     },
     "LaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
-      "DependsOn": "PhilterCache",
+      "DependsOn": [
+        "PhilterCache",
+        "FilterProfilesBucket"
+      ],
       "Properties": {
         "AssociatePublicIpAddress": "false",
         "BlockDeviceMappings": [
@@ -491,16 +639,8 @@
             }
           }
         ],
-        "KeyName": {
-          "Fn::If": [
-            "HasKeyName",
-            {
-              "Ref": "KeyName"
-            },
-            {
-              "Ref": "AWS::NoValue"
-            }
-          ]
+        "IamInstanceProfile": {
+          "Ref": "PhilterInstanceProfile"
         },
         "ImageId": {
           "Fn::FindInMap": [
@@ -510,6 +650,17 @@
             },
             {
               "Ref": "PhilterVersion"
+            }
+          ]
+        },
+        "KeyName": {
+          "Fn::If": [
+            "HasKeyName",
+            {
+              "Ref": "KeyName"
+            },
+            {
+              "Ref": "AWS::NoValue"
             }
           ]
         },
@@ -527,24 +678,51 @@
               "",
               [
                 "#!/bin/bash\n",
+                "rm /opt/philter/application.properties\n",
+                "echo '# General settings' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'server.port=8080' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'logging.level.root=INFO' | sudo tee -a /opt/philter/application.properties\n",
                 "echo 'model.file=/opt/philter/final-model.pt' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'anonymization.cache.service.redis.enabled=true' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'anonymization.cache.service.redis.host=",
+                "echo '# SSL certificate settings' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'server.ssl.key-store-type=PKCS12' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'server.ssl.key-store=/opt/philter/ssl/philter.p12' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'server.ssl.key-store-password=Password123!' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'server.ssl.key-alias=philter' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'security.require-ssl=true' | sudo tee -a /opt/philter/application.properties\n",
+                "echo '# Cache settings' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.enabled=true' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.host=",
                 {
                   "Fn::GetAtt": [
                     "PhilterCache",
                     "PrimaryEndPoint.Address"
                   ]
                 },
-                "\n' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'anonymization.cache.service.redis.port=6379\n' | sudo tee -a /opt/philter/application.properties\n",
-                "echo 'anonymization.cache.service.redis.auth.token=",
+                "' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.port=6379\n' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.auth.token=",
                 {
                   "Ref": "CacheAuthToken"
                 },
-                "\n' | sudo tee -a /opt/philter/application.properties\n",
+                "' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.ssl=true' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'cache.redis.cluster=false' | sudo tee -a /opt/philter/application.properties\n",
+                "echo '# Filter profiles settings' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'filter.profiles.s3.bucket=",
+                {
+                  "Ref": "FilterProfilesBucketName"
+                },
+                "' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'filter.profiles.s3.prefix=",
+                {
+                  "Ref": "FilterProfilesBucketPrefix"
+                },
+                "' | sudo tee -a /opt/philter/application.properties\n",
+                "echo 'filter.profiles.s3.region=",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "' | sudo tee -a /opt/philter/application.properties\n",
                 "sudo systemctl restart philter.service\n",
                 "sudo systemctl restart philter-ner.service\n",
                 "# Signal the status from cfn-init\n",
@@ -848,6 +1026,16 @@
         "Fn::GetAtt": [
           "PhilterLoadBalancer",
           "DNSName"
+        ]
+      }
+    },
+    "BastionPublicIPAddress": {
+      "Condition": "BastionCondition",
+      "Description": "Public IP address of the bastion instance",
+      "Value": {
+        "Fn::GetAtt": [
+          "BastionInstance",
+          "PublicIp"
         ]
       }
     }
