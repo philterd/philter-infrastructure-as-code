@@ -22,6 +22,10 @@ The benefits of using this CloudFormation template is that it provides a pre-con
 
 The deployment creates an elastic load balancer that is attached to an auto-scaled group of Philter EC2 instances. The load balancer spans two public subnets and the Philter EC2 instances are spread across two private subnets. Also in the private subnets is an Amazon Elasticache for Redis replication group. A NAT Gateway located in one of the public subnets provides outgoing internet access by routing the traffic to the VPC’s Internet Gateway.
 
+An S3 bucket is created to store the filter profiles. The bucket name is the concatenation of the stack name and `-filter-profiles`.
+
+Optionally, a bastion EC2 instance can be created to allow SSH access to the Philter EC2 instances. The bastion instance is not created unless the `CreateBastionInstance` parameter in the template is set to `true`. 
+
 ### Monitoring and Autoscaling
 
 The load balancer will monitor the status of each Philter EC2 instance by periodically checking the /api/status endpoint. If an instance is found to be unhealthy after failing several consecutive health checks the failing instance will be replaced.
