@@ -83,7 +83,7 @@
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
-        "v150": "ami-0051b62fabd3ef531",
+        "v150": "ami-0c45c7f52cef4c03e",
         "v140": "ami-09a429e63bdf9fca7",
         "v131": "ami-02447712b95a2b6ef",
         "v130": "ami-056684370df7a6369",
@@ -93,6 +93,7 @@
         "v100": "ami-027220e1960d5d016"
       },
       "us-east-2": {
+        "v150": "",
         "v140": "ami-036234eb8faafa848",
         "v131": "ami-0ee73da0d2a7032f6",
         "v130": "ami-0f2bd945e895513c2",
@@ -102,6 +103,7 @@
         "v100": "ami-0e8e5bd70ed6d6fdd"
       },
       "us-west-1": {
+        "v150": "",
         "v140": "ami-08d3397db5ba9665d",
         "v131": "ami-0ce182a9c2c4f368e",
         "v130": "ami-0990880fb27e33219",
@@ -111,6 +113,7 @@
         "v100": "ami-0f984901cc0f822d3"
       },
       "us-west-2": {
+        "v150": "",
         "v140": "ami-0eaff58b8ffdefa92",
         "v131": "ami-0873538d8179fde10",
         "v130": "ami-0c2a8f82fb0af9f53",
@@ -118,6 +121,26 @@
         "v110": "ami-084642b32536f2911",
         "v101": "ami-0ae4843578c7cfdc7",
         "v100": "ami-0794c35ebe9e36b19"
+      },
+      "us-gov-east-1": {
+        "v150": "",
+        "v140": "ami-45cc2034",
+        "v131": "ami-f9cf2288",
+        "v130": "ami-8e7092ff",
+        "v120": "ami-1733d166",
+        "v110": "ami-fc7f9c8d",
+        "v101": "ami-88ab48f9",
+        "v100": "ami-3f4cac4e"
+      },
+      "us-gov-west-1": {
+        "v150": "",
+        "v140": "ami-018bba60",
+        "v131": "ami-cabd93ab",
+        "v130": "ami-48d8fb29",
+        "v120": "ami-4e28092f",
+        "v110": "ami-a26c37c3",
+        "v101": "ami-f36a3b92",
+        "v100": "ami-b3de89d2"
       }
     }
   },
