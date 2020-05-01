@@ -2,9 +2,9 @@
 
 This repository contains a collection of infrastructure-as-code (IaC) resources for deploying [Philter](https://www.mtnfog.com/products/philter/) to identify and remove sensitive information from text.
 
-## Philter IaC Resources in this Repository
+You are welcome to use these resources as-is or to customize them to meet your needs. Please [contact us](https://www.mtnfog.com/contact-us/) if you need assistance with the resources in this repository.
 
-You are welcome to use these resources as-is or to customize them to meet your needs.
+## Templates and Scripts
 
 | Platform | Scripts | Description | Launch |
 |----------|--------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

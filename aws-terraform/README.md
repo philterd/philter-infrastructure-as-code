@@ -22,9 +22,11 @@ The benefits of using these Terraform scripts is that they provide a pre-configu
 
 The deployment creates an elastic load balancer that is attached to an auto-scaled group of Philter EC2 instances. The load balancer spans two public subnets and the Philter EC2 instances are spread across two private subnets. Also in the private subnets is an Amazon Elasticache for Redis replication group. A NAT Gateway located in one of the public subnets provides outgoing internet access by routing the traffic to the VPC’s Internet Gateway.
 
+Optionally, a bastion EC2 instance can be created to allow SSH access to the Philter EC2 instances. The bastion instance is not created unless the `create_bastion_instance` variable is set to `true`.
+
 ### Monitoring and Autoscaling
 
-The load balancer will monitor the status of each Philter EC2 instance by periodically checking the /api/status endpoint. If an instance is found to be unhealthy after failing several consecutive health checks the failing instance will be replaced.
+The load balancer will monitor the status of each Philter EC2 instance by periodically checking the `/api/status` endpoint. If an instance is found to be unhealthy after failing several consecutive health checks the failing instance will be replaced.
 
 The Philter auto-scaling group is set to scale up and down based on the average CPU utilization of the Philter EC2 instances. When the CPU usage hits the high threshold another Philter EC2 instance will be added. When the CPU usage hits the low threshold, the auto-scaling group will begin removing (and terminating) instances from the group. The scaling policy is set to scale up faster rate than scaling down to avoid scaling down too quickly.
 
