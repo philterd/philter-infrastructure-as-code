@@ -9,9 +9,11 @@
     },
     "PhilterVersion": {
       "Description": "The version of Philter to deploy",
-      "Default": "v140",
+      "Default": "v160",
       "Type": "String",
       "AllowedValues": [
+        "v160",
+        "v150",
         "v140",
         "v131",
         "v130",
@@ -80,7 +82,8 @@
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
-        "v150": "",
+        "v160": "ami-054fbc3658fa6653f",
+        "v150": "ami-06ab9b890c84672c6",
         "v140": "ami-09a429e63bdf9fca7",
         "v131": "ami-02447712b95a2b6ef",
         "v130": "ami-056684370df7a6369",
@@ -90,7 +93,8 @@
         "v100": "ami-027220e1960d5d016"
       },
       "us-east-2": {
-        "v150": "",
+        "v160": "ami-0453d63f5d80ce23a",
+        "v150": "ami-0061e3149bcfc6133",
         "v140": "ami-036234eb8faafa848",
         "v131": "ami-0ee73da0d2a7032f6",
         "v130": "ami-0f2bd945e895513c2",
@@ -100,7 +104,8 @@
         "v100": "ami-0e8e5bd70ed6d6fdd"
       },
       "us-west-1": {
-        "v150": "",
+        "v160": "ami-07a2a60e352fc532e",
+        "v150": "ami-04373ee8ad5309876",
         "v140": "ami-08d3397db5ba9665d",
         "v131": "ami-0ce182a9c2c4f368e",
         "v130": "ami-0990880fb27e33219",
@@ -110,7 +115,8 @@
         "v100": "ami-0f984901cc0f822d3"
       },
       "us-west-2": {
-        "v150": "",
+        "v160": "ami-0625ff54022b9ca0b",
+        "v150": "ami-0959832018d75ca26",
         "v140": "ami-0eaff58b8ffdefa92",
         "v131": "ami-0873538d8179fde10",
         "v130": "ami-0c2a8f82fb0af9f53",
@@ -120,7 +126,8 @@
         "v100": "ami-0794c35ebe9e36b19"
       },
       "us-gov-east-1": {
-        "v150": "",
+        "v160": "ami-0470c3fe14a35dc71",
+        "v150": "ami-086e8279",
         "v140": "ami-45cc2034",
         "v131": "ami-f9cf2288",
         "v130": "ami-8e7092ff",
@@ -130,7 +137,8 @@
         "v100": "ami-3f4cac4e"
       },
       "us-gov-west-1": {
-        "v150": "",
+        "v160": "ami-0bec4336aec253151",
+        "v150": "ami-0dd0ed6c",
         "v140": "ami-018bba60",
         "v131": "ami-cabd93ab",
         "v130": "ami-48d8fb29",
