@@ -7,8 +7,8 @@ You are welcome to use these resources as-is or to customize them to meet your n
 ## Templates and Scripts
 
 * [CloudFormation Template](https://github.com/philterd/philter-infrastructure-as-code/tree/master/aws-cloudformation/)
-* [Terraform Scripts](https://github.com/philterd/philter-infrastructure-as-code/tree/master/aws-terraform/) | Terraform scripts for a load-balanced, highly-available Philter deployment.
-* [Terraform Module](https://github.com/philterd/philter-infrastructure-as-code/tree/master/aws-terraform-module) | Terraform module that creates a single Philter EC2 instance.
+* [Terraform Scripts](https://github.com/philterd/philter-infrastructure-as-code/tree/master/aws-terraform/)
+* [Terraform Module](https://github.com/philterd/philter-infrastructure-as-code/tree/master/aws-terraform-module)
 
 ## License
 
